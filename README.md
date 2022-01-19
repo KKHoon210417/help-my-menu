@@ -32,29 +32,25 @@
 
 <br>
 
-## 🛠 사용기술 &nbsp; [Wiki](https://github.com/hellonayeon/recipe-recommend-service/wiki/%EC%82%AC%EC%9A%A9-%EA%B8%B0%EC%88%A0-%EC%86%8C%EA%B0%9C)
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3766AB?style=flat-square&logo=Python&logoColor=white"/>
-  <img src="https://img.shields.io/badge/JavaScript-ffb13b?style=flat-square&logo=javascript&logoColor=white"/>
-  <img src="https://img.shields.io/badge/HTML-E34F26?style=flat-square&logo=html5&logoColor=white"/>
-  <img src="https://img.shields.io/badge/CSS-1572B6?style=flat-square&logo=css3&logoColor=white"/>
-  <img src="https://img.shields.io/badge/mongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white"/>
-  <img src="https://img.shields.io/badge/PyCharm-000000?style=flat-square&logo=pycharm&logoColor=white"/>
-  <img src="https://img.shields.io/badge/aws-333664?style=flat-square&logo=amazon-aws&logoColor=white"/>
-</p>
-
-### Front-End
-
-`HTML` / `Javascript` / `CSS`
-
-`Ajax`
+## 🛠 프로젝트 사용기술 &nbsp;
 
 ### Back-End
 
-`Python`: `flask` `pymongo` `requests`
+- Python3
+- Flask
+- pymongo
+- requests
+- MongoDB
+- AWS S3
+- AWS EB
+- Gitactions
 
-`MongoDB`
+### Front-End
+
+- HTML
+- Javascript
+- CSS
+- jQuery
 
 ### Data
 
@@ -68,85 +64,115 @@
 
 <br>
 
-## 💡 주요기능 &nbsp; [Wiki](https://github.com/hellonayeon/recipe-recommend-service/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-%EC%86%8C%EA%B0%9C)
+## 💡 나의 사용기술 &nbsp;
+
+- jQuery UI의 Autocomplete를 사용해 자동완성검색기능을 구현했습니다.
+- Git을 이용해 프로젝트 Branch와 Issue를 관리했습니다.
+- Boto3를 이용해 AWS S3 버킷에 이미지를 저장을 구현했습니다.
+- Flask를 사용해 Restful하게 API를 구현했습니다.
+
+<br>
+
+## 💡 핵심 트러블 슈팅 &nbsp;
+
+### jQuery UI 자동완성기능 데이터소스 처리 문제
+
+- 기존의 사용자가 재료를 입력하기 위해서는 약 200가지의 모든 재료데이터를 Dropdown으로 가져와 직접 선택해야 하는 불편함이 있었습니다.
+- 이를 해결하기 위해서 jQuery UI에서 제공하는 Autocomplete를 사용해서 자동완성기능을 만들었고, 자동완성기능에 사용될 데이터 소스를 어떤식으로 가져와야할지에 대해 고민을 했습니다.<br>
+이에 대해 두가지의 방법을 생각했습니다.<br>
+
+1. 페이지 로딩 시 데이터를 전부 보내서 클라이언트에 보관하는 방식
+    - 페이지 로딩 시 한 번만 API를 호출하면 된다.
+    - 데이터소스의 양이 적다면 클라이언트 메모리에 무리가 가지 않는다.
+
+2. 자동완성검색 타이핑 시 이벤트 감지를 이용해 재료데이터 API를 호출하는 방식
+    - 데이터소스가 많을 때, 필요한 데이터소스만 가져올 수 있다.
+    - 이벤트 감지시마다 API가 호출해야할 필요가 있다.
+
+- 두 가지 방법에서 다음과 같은 특징을 찾아내었고, 추후 데이터의 양이 점차 늘어날 것을 생각했을 때 2번안이 옳지만 재료는 종류가 한정적이라는 특징이 있어 프로젝트가 성장해도 데이터의 양이 기하 급수적으로 늘어나지 않기 때문에, 1번안을 선택하여 적용하였습니다.
 
 <details markdown="1">
-<summary>레시피 추천</summary>
+<summary>개선된 코드</summary>
 
-#### 재료 선택
-     
-What's in my 냉장고? 자신이 가지고 있는 재료를 입력할 수 있습니다.
+-frontend
 
-*  입력한 재료 텍스트 자동완성
-*  원하는 음식 분류 선택
-*  난이도, 조리시간 선택
+```javascript
+//첫 화면 재료 선택 데이터 가져오기
+function ingredientListing() {
+    $.ajax({
+        type: "GET",
+        url: "/ingredient-and-recipe",
+        data: {},
+        success: function (response) {
+            let ingreList = response['recipe_ingredient']
 
-<br>
+            for (let i = 0; i < ingreList.length; i++) {
+                let ingredient = ingreList[i]
+                let tempHtml = `<option value="main">${ingredient}</option>`
+                $('#ingredient-select-list').append(tempHtml)
+            }
+        }
+    });
+}
+```
 
-#### 레시피 추천
+- backend
 
-입력한 재료들로 만들 수 있는 레시피를 추천합니다.
-   
-* 썸네일
-* 레시피에 대한 간단한 요약
-
-레시피 조회 필터를 적용할 수 있습니다.
-
-* 좋아요 / 이름순 
-* 조리 난이도 / 소요 시간 / 요리 타입(한식, 중식, 양식, 일식)
-
-원하는 키워드를 포함하는 레시피를 검색할 수 있습니다.
-
-* 입력한 키워드에 포함된 레시피 이름들 자동 완성
-  
-<br>
-  
-#### 좋아요 ♥
-   
-관심있는 레시피는 좋아요를 통해 저장이 가능합니다.
-  
-* 레시피 리스트와 상세 페이지에서 좋아요 선택
-* 좋아요 취소
-
-<br>
-
-#### 좋아요 TOP20
-
-`좋아요 ♥` 많이 받은 상위 20개의 레시피들을 메인 화면에 보여줍니다.
-
-<br>
-
-#### 댓글
-
-레시피에 간단한 의견을 남길 수 있습니다.
-
-* 상세페이지에서 댓글 작성 가능
-* 댓글 수정/삭제/이미지 업로드 기능
+```python
+# 첫 화면 재료 항목 불러오기
+@application.route('/ingredient-and-recipe', methods=['GET'])
+def ingredient_listing():
+    # 중복 제거
+    irdnt = list(db.recipe_ingredient.distinct("IRDNT_NM"))
+    recipe = list(db.recipe_basic.distinct("RECIPE_NM_KO"))
+    return jsonify({'recipe_ingredient': irdnt, 'recipe_name_kor': recipe})
+```
 
 </details>
 
 <br>
 
-<details markdown="1">
-<summary>회원 관리</summary>
-
-#### 회원가입 및 로그인
-
-이메일을 통해 회원가입/로그인을 합니다.
-
-<br>
-
-#### 마이페이지
-
-자신의 활동 기록들을 확인할 수 있습니다.
-
-* 프로필 내용과 프로필 이미지 수정
-* 자신의 활동을 확인 가능: 댓글, `좋아요 ♥`를 누른 레시피, 작성한 레시피
-  
-</details>
-
-
-<br>
-
-## 👾 문제해결 &nbsp; [Wiki](https://github.com/hellonayeon/recipe-recommend-service/wiki/%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0-%EA%B3%BC%EC%A0%95)
+## 👾 그 외 트러블 슈팅 &nbsp;
  
+<details markdown="2">
+<summary>프로필 이미지 파일 저장 문제</summary>
+  
+- 프로젝트 폴더 내에 '프로필 이미지'를 저장하여 프로젝트 재 배포할 때 마다 프로필 이미지 초기화 되는 문제가 발생하였습니다.
+- 이를 해결하기 위해 boto3를 이용해서 AWS S3의 버킷에 이미지 파일이 저장되도록 수정하였습니다.<br>
+  
+[issue87](https://github.com/hellonayeon/help-my-menu/issues/87)
+  
+</details>
+
+<details markdown="3">
+<summary>코드 컨벤션 재 정립 문제</summary>
+  
+- 각자 작성한 코드를 합치는 과정에서 컨벤션 정립 미흡하여 코드 가독성 저하 문제 발생하였습니다.
+- 문제 해결을 위해 팀 회의를 통해 컨벤션 재 정립 후 코드 리팩토링 실시하였습니다.
+  
+[issue42](https://github.com/hellonayeon/help-my-menu/issues/42)
+
+</details>
+
+<details markdown="4">
+<summary>User DB PK 중복 문제</summary>
+  
+- 회원 인증 기능을 도입하면서 사용자에 따라 처리해야할 기능이 많아졌습니다.
+- 효과적으로 데이터를 관리할 수 있는 방법에 대해 팀원들과 회의를 통해 다음과 같이 User DB PK를 사용하도록 결정하였습니다.
+- 로그인에 필요한 ID는 Email을 선정, 내부적으로 사용자를 식별하는 PK는 MongoDB에서 제공하는 Objectid로 선정하였습니다.
+ 
+[issue63](https://github.com/hellonayeon/help-my-menu/issues/63)
+
+</details>
+
+<details markdown="5">
+<summary>레시피 추천 기능 성능 개선</summary>
+  
+- 재료의 종류, 난이도, 조리 시간, 장르 선택에 따라 레시피 추천이 하나도 안뜨는 문제가 발생하였습니다.
+- 사용자 입장에서 매번 모든 조건을 입력하고도 레시피 추천을 받지 못하는 것은 불편함으로서 작용할 것이라고 판단하였습니다.
+- 이 문제를 해결하고자 난이도, 조리 시간, 장르 3가지의 조건은 필터로 사용자가 옵셔널하게 입력할 수 있도록 개선하였습니다.
+- 그 결과 재료 선택 후 레시피 추천받을 경우 추천 레시피가 뜨지 않는 문제를 해결할 수 있었습니다.
+ 
+[issue46](https://github.com/hellonayeon/help-my-menu/issues/46)
+
+</details>
